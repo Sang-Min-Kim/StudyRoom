@@ -7,6 +7,7 @@ import {
   X,
 } from 'lucide-react';
 import type { StoredFileMeta } from '../types';
+import { resolveApiUrl } from '../utils/api';
 import { formatBytes, getPreviewKind } from '../utils/format';
 
 interface FilePreviewModalProps {
@@ -28,7 +29,7 @@ export const FilePreviewModal: React.FC<FilePreviewModalProps> = ({ file, onClos
     }
     let cancelled = false;
     setLoading(true);
-    fetch(`${file.url}?inline=1`)
+    fetch(resolveApiUrl(`${file.url}?inline=1`))
       .then((res) => res.text())
       .then((text) => {
         if (!cancelled) setTextContent(text);
@@ -107,7 +108,7 @@ export const FilePreviewModal: React.FC<FilePreviewModalProps> = ({ file, onClos
               </button>
             )}
             <a
-              href={file.url}
+              href={resolveApiUrl(file.url)}
               download={file.originalName}
               className="inline-flex min-h-[40px] items-center gap-1.5 rounded-lg bg-blue-600 px-3.5 sm:px-4 text-xs font-semibold text-white transition-colors hover:bg-blue-700 whitespace-nowrap shrink-0"
             >
@@ -129,7 +130,7 @@ export const FilePreviewModal: React.FC<FilePreviewModalProps> = ({ file, onClos
           {kind === 'image' && (
             <div className="flex items-center justify-center">
               <img
-                src={`${file.url}?inline=1`}
+                src={resolveApiUrl(`${file.url}?inline=1`)}
                 alt={file.originalName}
                 referrerPolicy="no-referrer"
                 className="max-h-[70dvh] w-auto rounded-lg border border-slate-200 bg-white object-contain"
@@ -140,7 +141,7 @@ export const FilePreviewModal: React.FC<FilePreviewModalProps> = ({ file, onClos
           {kind === 'pdf' && (
             <div className="space-y-3">
               <iframe
-                src={`${file.url}?inline=1`}
+                src={resolveApiUrl(`${file.url}?inline=1`)}
                 title={file.originalName}
                 className="h-[65dvh] sm:h-[70vh] w-full rounded-lg border border-slate-200 bg-white"
               />
@@ -169,7 +170,7 @@ export const FilePreviewModal: React.FC<FilePreviewModalProps> = ({ file, onClos
                 이 파일 형식은 브라우저에서 바로 미리보기를 지원하지 않습니다.
               </p>
               <a
-                href={file.url}
+                href={resolveApiUrl(file.url)}
                 download={file.originalName}
                 className="mt-4 inline-flex min-h-[44px] items-center gap-2 rounded-lg bg-blue-600 px-5 text-sm font-semibold text-white hover:bg-blue-700"
               >

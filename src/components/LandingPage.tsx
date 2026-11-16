@@ -13,7 +13,7 @@ import {
   Trash2,
 } from 'lucide-react';
 import type { ActiveSession, RoomCheckResult, SavedHostRoom } from '../types';
-import { apiRequest } from '../utils/api';
+import { apiRequest, checkBackendHealth } from '../utils/api';
 import {
   formatDateTime,
   getClientId,
@@ -63,8 +63,16 @@ export const LandingPage: React.FC<LandingPageProps> = ({ initialPin, onEnterRoo
     getSavedHostRooms()
   );
   const [activeHostMap, setActiveHostMap] = useState<Record<string, boolean>>({});
+  const [isStaticDeploy, setIsStaticDeploy] = useState(false);
 
   useEffect(() => {
+    let cancelled = false;
+    checkBackendHealth().then((status) => {
+      if (!cancelled && status === 'static') {
+        setIsStaticDeploy(true);
+      }
+    });
+
     const rooms = getSavedHostRooms();
     setSavedHostRooms(rooms);
     rooms.forEach((room) => {
@@ -79,6 +87,9 @@ export const LandingPage: React.FC<LandingPageProps> = ({ initialPin, onEnterRoo
         })
         .catch(() => {});
     });
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   useEffect(() => {
@@ -377,6 +388,16 @@ export const LandingPage: React.FC<LandingPageProps> = ({ initialPin, onEnterRoo
             강사는 4자리 숫자로 방을 열어 교안과 파일을 수시로 배포하고, 수강생은 PC와 모바일 웹에서 번호만 입력해 자료 다운로드, 과제 제출, 실시간 채팅을 바로 이용합니다.
           </p>
         </div>
+
+        {/* Static-only deployment warning */}
+        {isStaticDeploy && (
+          <div className="mt-6 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3.5 text-xs sm:text-sm text-amber-900">
+            <p className="font-bold">정적 호스팅(프론트엔드 전용) 환경에서 실행 중입니다.</p>
+            <p className="mt-1 leading-relaxed text-amber-800">
+              StudyRoom은 실시간 강의실 개설·파일 공유·채팅을 위해 Node.js 백엔드 서버(<code className="font-mono">npm start</code>)가 함께 실행되어야 합니다. 정적 미리보기(Share)나 정적 CDN만 배포된 상태에서는 요청 시 HTTP 405 오류가 발생하므로, Cloud Run 등 풀스택 서버 환경으로 배포해 주세요.
+            </p>
+          </div>
+        )}
 
         {/* Two-column Join / Host Split */}
         <div className="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-12 lg:items-stretch">

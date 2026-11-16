@@ -19,7 +19,7 @@ import {
   X,
 } from 'lucide-react';
 import type { MaterialItem, Role, StoredFileMeta } from '../types';
-import { apiRequest } from '../utils/api';
+import { apiRequest, resolveApiUrl } from '../utils/api';
 import { prepareFileForUpload } from '../utils/upload';
 import {
   formatBytes,
@@ -167,7 +167,7 @@ export const MaterialsPanel: React.FC<MaterialsPanelProps> = ({
 
   const handleTogglePin = async (item: MaterialItem) => {
     if (!isInstructor || !hostToken) return;
-    await fetch(`/api/rooms/${roomCode}/materials/${item.id}`, {
+    await fetch(resolveApiUrl(`/api/rooms/${roomCode}/materials/${item.id}`), {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
@@ -179,7 +179,7 @@ export const MaterialsPanel: React.FC<MaterialsPanelProps> = ({
 
   const handleDelete = async (id: string) => {
     if (!isInstructor || !hostToken) return;
-    await fetch(`/api/rooms/${roomCode}/materials/${id}`, {
+    await fetch(resolveApiUrl(`/api/rooms/${roomCode}/materials/${id}`), {
       method: 'DELETE',
       headers: { 'x-host-token': hostToken },
     });
@@ -193,7 +193,7 @@ export const MaterialsPanel: React.FC<MaterialsPanelProps> = ({
 
   const saveEdit = async (id: string) => {
     if (!isInstructor || !hostToken) return;
-    await fetch(`/api/rooms/${roomCode}/materials/${id}`, {
+    await fetch(resolveApiUrl(`/api/rooms/${roomCode}/materials/${id}`), {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
@@ -704,7 +704,7 @@ export const MaterialsPanel: React.FC<MaterialsPanelProps> = ({
                             </button>
                           )}
                           <a
-                            href={item.file.url}
+                            href={resolveApiUrl(item.file.url)}
                             download={item.file.originalName}
                             className="inline-flex min-h-[38px] items-center gap-1.5 rounded-lg bg-slate-900 px-3.5 text-xs font-semibold text-white hover:bg-slate-800 whitespace-nowrap"
                           >

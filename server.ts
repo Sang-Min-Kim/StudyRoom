@@ -368,6 +368,18 @@ setInterval(() => {
 const app = express();
 app.use(express.json({ limit: '2mb' }));
 
+// CORS & preflight for /api/* (supports separated frontend/backend origins when configured)
+app.use('/api', (req, res, next) => {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PATCH, DELETE, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, x-host-token');
+  if (req.method === 'OPTIONS') {
+    res.status(204).end();
+    return;
+  }
+  next();
+});
+
 // Health check
 app.get('/api/health', (_req, res) => {
   res.json({ ok: true });
@@ -1220,7 +1232,12 @@ wss.on('close', () => {
 
 // ---- Vite Dev Middleware or Static Production ----
 async function startServer(): Promise<void> {
-  const isProd = process.env.NODE_ENV === 'production';
+  const distDir = path.resolve(process.cwd(), 'dist');
+  const distIndex = path.join(distDir, 'index.html');
+  const isDevMode =
+    process.env.NODE_ENV === 'development' || process.env.npm_lifecycle_event === 'dev';
+  const isProd =
+    process.env.NODE_ENV === 'production' || (!isDevMode && fs.existsSync(distIndex));
 
   if (!isProd) {
     const { createServer: createViteServer } = await import('vite');
@@ -1230,10 +1247,9 @@ async function startServer(): Promise<void> {
     });
     app.use(vite.middlewares);
   } else {
-    const distDir = path.resolve(process.cwd(), 'dist');
     app.use(express.static(distDir));
     app.get('*', (_req, res) => {
-      res.sendFile(path.join(distDir, 'index.html'));
+      res.sendFile(distIndex);
     });
   }
 

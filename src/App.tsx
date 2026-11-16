@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { LandingPage } from './components/LandingPage';
 import { RoomView } from './components/RoomView';
 import type { ActiveSession } from './types';
+import { resolveApiUrl } from './utils/api';
 import { ACTIVE_SESSION_KEY } from './utils/format';
 
 export default function App() {
@@ -44,7 +45,7 @@ export default function App() {
       return;
     }
 
-    fetch('/api/rooms/join', {
+    fetch(resolveApiUrl('/api/rooms/join'), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({

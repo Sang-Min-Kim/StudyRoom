@@ -22,7 +22,7 @@ import type {
   StoredFileMeta,
   SubmissionItem,
 } from '../types';
-import { apiRequest } from '../utils/api';
+import { apiRequest, resolveApiUrl, resolveWsUrl } from '../utils/api';
 import { removeSavedHostRoom, saveHostRoom } from '../utils/format';
 import { ChatPanel } from './ChatPanel';
 import { FilePreviewModal } from './FilePreviewModal';
@@ -79,8 +79,7 @@ export const RoomView: React.FC<RoomViewProps> = ({
 
     const connect = () => {
       if (disposed) return;
-      const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-      const socket = new WebSocket(`${protocol}//${window.location.host}/ws`);
+      const socket = new WebSocket(resolveWsUrl());
       wsRef.current = socket;
 
       socket.onopen = () => {
@@ -306,7 +305,7 @@ export const RoomView: React.FC<RoomViewProps> = ({
     nextSubmissionsOpen: boolean
   ) => {
     if (!isInstructor || !hostToken) return;
-    await fetch(`/api/rooms/${room.code}/settings`, {
+    await fetch(resolveApiUrl(`/api/rooms/${room.code}/settings`), {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
@@ -366,7 +365,7 @@ export const RoomView: React.FC<RoomViewProps> = ({
 
   const handleCloseRoom = async () => {
     if (!isInstructor || !hostToken) return;
-    await fetch(`/api/rooms/${room.code}`, {
+    await fetch(resolveApiUrl(`/api/rooms/${room.code}`), {
       method: 'DELETE',
       headers: { 'x-host-token': hostToken },
     });

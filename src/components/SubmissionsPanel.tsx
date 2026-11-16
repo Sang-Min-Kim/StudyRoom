@@ -16,7 +16,7 @@ import {
   Upload,
 } from 'lucide-react';
 import type { Role, StoredFileMeta, SubmissionItem, SubmissionStatus } from '../types';
-import { apiRequest } from '../utils/api';
+import { apiRequest, resolveApiUrl } from '../utils/api';
 import { formatBytes, formatDateTime, getPreviewKind } from '../utils/format';
 import { prepareFileForUpload } from '../utils/upload';
 
@@ -159,7 +159,7 @@ export const SubmissionsPanel: React.FC<SubmissionsPanelProps> = ({
 
   const handleToggleSubmissionsOpen = async () => {
     if (!isInstructor || !hostToken) return;
-    await fetch(`/api/rooms/${roomCode}/settings`, {
+    await fetch(resolveApiUrl(`/api/rooms/${roomCode}/settings`), {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
@@ -173,7 +173,7 @@ export const SubmissionsPanel: React.FC<SubmissionsPanelProps> = ({
     if (!isInstructor || !hostToken) return;
     const nextStatus: SubmissionStatus =
       item.status === 'reviewed' ? 'submitted' : 'reviewed';
-    await fetch(`/api/rooms/${roomCode}/submissions/${item.id}`, {
+    await fetch(resolveApiUrl(`/api/rooms/${roomCode}/submissions/${item.id}`), {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
@@ -189,7 +189,9 @@ export const SubmissionsPanel: React.FC<SubmissionsPanelProps> = ({
       headers['x-host-token'] = hostToken;
     }
     await fetch(
-      `/api/rooms/${roomCode}/submissions/${id}?studentId=${encodeURIComponent(clientId)}`,
+      resolveApiUrl(
+        `/api/rooms/${roomCode}/submissions/${id}?studentId=${encodeURIComponent(clientId)}`
+      ),
       {
         method: 'DELETE',
         headers,
@@ -638,7 +640,7 @@ export const SubmissionsPanel: React.FC<SubmissionsPanelProps> = ({
                     )}
                     {file && (
                       <a
-                        href={file.url}
+                        href={resolveApiUrl(file.url)}
                         download={file.originalName}
                         className="inline-flex min-h-[38px] items-center gap-1 rounded-lg bg-slate-900 px-3 text-xs font-semibold text-white hover:bg-slate-800 whitespace-nowrap"
                       >
